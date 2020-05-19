@@ -35,70 +35,64 @@ mauve = (255, 198, 255, 128)
 
 #====================================FUNCIONES==================================
 
-def MultiplyMatrixVector(i:np.array,m:np.ndarray,v:int):
-    temp_array = np.zeros((1,4))
+def MultMatrix4X4Vector1x4(i:np.array,m:np.matrix):
 
+    temp_mat = i*m
 
-    temp_array[0][0] = float(i[v][0]*m[0][0]) + float(i[v][1]*m[0][1]) + float(i[v][2]*m[0][2]) + float(m[0][3])
-    temp_array[0][1] = float(i[v][0]*m[1][0]) + float(i[v][1]*m[1][1]) + float(i[v][2]*m[1][2]) + float(m[1][3])
-    temp_array[0][2] = float(i[v][0]*m[2][0]) + float(i[v][1]*m[2][1]) + float(i[v][2]*m[2][2]) + float(m[2][3])
-    temp_array[0][3] = float(i[v][0]*m[3][0]) + float(i[v][1]*m[3][1]) + float(i[v][2]*m[3][2]) + float(m[3][3])
+    final_array = np.squeeze(np.asarray(temp_mat))
 
-    # print(i[0][0])
+    if (final_array[3] != 0):
+        final_array[0] /= final_array[3]
+        final_array[1] /= final_array[3]
+        final_array[2] /= final_array[3]
 
-
-
-    o = np.array([temp_array[0][0],temp_array[0][1],temp_array[0][2]])
-    # w distinto de cero?
-    if (temp_array[0][3] != 0):
-        x = temp_array[0][0] / temp_array[0][3]
-        y = temp_array[0][1] / temp_array[0][3]
-        z = temp_array[0][2] / temp_array[0][3]
-        o = np.array([x,y,z])
-
-    return o
+    return final_array
 
 
 
 #===============================PROYECTION_MATRIX===============================
 
 #Proyection Matrix
-matProj = np.zeros((4,4))
+def Proj ():
+    # Distancias de planos de distorsión
+    Near = 1
+    Far = 500.0
+    Fov = 45.0
+    AspectRatio = display_height / display_width
+    FovRad = 1.0 / mt.tan(mt.radians(Fov) * 0.5 )
 
-
-# Distancias de planos de distorsión
-Near = 1;
-Far = 500.0;
-Fov = 45.0;
-AspectRatio = display_height / display_width;
-FovRad = 1.0 / mt.tan(mt.radians(Fov) * 0.5 );
-
-matProj[0][0] =  FovRad # * AspectRatio
-matProj[1][1] = FovRad
-matProj[2][2] = (Far+Near) / (Far - Near)
-matProj[3][2] = (2*Far * Near) / (Far - Near)
-matProj[2][3] = 1.0;
-matProj[3][3] = 0.0;
+    a0 = FovRad # * AspectRatio
+    b1 = FovRad
+    c2 = (Far+Near) / (Far - Near)
+    d2 = (2*Far * Near) / (Far - Near)
+    c3 = 1.0
+                        #  0 1 2 3
+    matProj = np.matrix([[a0,0,0,0],    #A
+                         [0,b1,0,0],    #B
+                         [0,0,c2,c3],   #C
+                         [0,0,d2,0]])   #D
+    return matProj
 
 # Rotation z
 def Rotz (theta:float):
-    matRotz = np.zeros((4,4))
 
-    matRotz[0][0] = mt.cos(mt.radians(theta))
-    matRotz[0][1] = mt.sin(mt.radians(theta))
-    matRotz[1][0] = -(mt.sin(mt.radians(theta)))
-    matRotz[1][1] = mt.cos(mt.radians(theta))
-    matRotz[2][2] = 1.0
-    matRotz[3][3] = 1.0
+    a0 = mt.cos(mt.radians(theta))
+    a1 = mt.sin(mt.radians(theta))
+    b0 = -(mt.sin(mt.radians(theta)))
+    b1 = mt.cos(mt.radians(theta))
+    c2 = 1.0
+    d3 = 1.0
+                        #  0 1 2 3
+    matRotz = np.matrix([[a0,a1,0,0],   #A
+                         [b0,b1,0,0],   #B
+                         [0,0,c2,0],    #C
+                         [0,0,0,d3]])   #D
 
     return matRotz
 
 
-
-
 # Rotation x
 def Rotx (theta:float):
-    matRotx = np.zeros((4,4))
 
     matRotx[0][0] = 1.0
     matRotx[1][1] = mt.cos(mt.radians(theta))
@@ -107,52 +101,82 @@ def Rotx (theta:float):
     matRotx[2][2] = mt.cos(mt.radians(theta))
     matRotx[3][3] = 1.0
 
+    a0 = 1.0
+    b1 = mt.cos(mt.radians(theta))
+    b2 = mt.sin(mt.radians(theta))
+    c1 = -(mt.sin(mt.radians(theta)))
+    c2 = mt.cos(mt.radians(theta))
+    d3 = 1.0
+                        #  0 1 2 3
+    matRotx = np.matrix([[a0,0,0,0],    #A
+                         [0,b1,b2,0],   #B
+                         [0,c1,c2,0],   #C
+                         [0,0,0,d3]])   #D
+
     return matRotx
 
+# Move xyz;
+def mov_xyz(x=0,y=0,z=0):
+                        #  0 1 2 3
+    matMov = np.matrix([[1,0,0,0],   #A
+                        [0,1,1,0],   #B
+                        [0,1,1,0],   #C
+                        [x,y,z,1]])  #D
+
+    return matMov
+
+def scale_xyz(x=1,y=1,z=1):
+                        #  0 1 2 3
+    sclMov = np.matrix([[x,0,0,0],   #A
+                        [0,y,0,0],   #B
+                        [0,0,z,0],   #C
+                        [0,0,0,1]])  #D
 
 
-def cube(mesh_Cube:list,thetaX:float,thetaZ:float):
-    for t in mesh_Cube:
-        proyeccion = [np.array([0.0,0.0,0.0]),np.array([0.0,0.0,0.0]),np.array([0.0,0.0,0.0])]
+def cube(mesh_Cube:list):
+    for tri in mesh_Cube:
+        projected = []
+        translated = tri
 
-        rotateZ = [np.array([0.0,0.0,0.0]),np.array([0.0,0.0,0.0]),np.array([0.0,0.0,0.0])]
-        rotateZX = [np.array([0.0,0.0,0.0]),np.array([0.0,0.0,0.0]),np.array([0.0,0.0,0.0])]
+        # Alejar la camara
+        translated[0][2] = tri[0][2] + 3.0
+        translated[1][2] = tri[1][2] + 3.0
+        translated[2][2] = tri[2][2] + 3.0
 
-        rotateZ[0] = MultiplyMatrixVector(t,Rotz(thetaZ),0)
-        rotateZ[1] = MultiplyMatrixVector(t,Rotz(thetaZ),0)
-        rotateZ[2] = MultiplyMatrixVector(t,Rotz(thetaZ),0)
+        print(translated)
 
-        rotateZX[0] = MultiplyMatrixVector(rotateZ,Rotx(thetaX),0)
-        rotateZX[1] = MultiplyMatrixVector(rotateZ,Rotx(thetaX),0)
-        rotateZX[2] = MultiplyMatrixVector(rotateZ,Rotx(thetaX),0)
+        for vec in translated:
+            # print(vec)
 
-        translated = deepcopy(rotateZX)
-        for v in range(len(translated)):
-            translated[v][2] = rotateZX[v][2]+3
+            # Efecto de proyección
+            temp = MultMatrix4X4Vector1x4(vec,Proj())
+            projected.append(temp);
 
-        proyeccion[0] = MultiplyMatrixVector(translated,matProj,0)
-        proyeccion[1] = MultiplyMatrixVector(translated,matProj,1)
-        proyeccion[2] = MultiplyMatrixVector(translated,matProj,2)
 
-        proyeccion[0][0] += 1.0
-        proyeccion[0][1] += 1.0
-        proyeccion[1][0] += 1.0
-        proyeccion[1][1] += 1.0
-        proyeccion[2][0] += 1.0
-        proyeccion[2][1] += 1.0
+        x0 = projected[0][0]
+        y0 = projected[0][1]
+        x1 = projected[1][0]
+        y1 = projected[1][1]
+        x2 = projected[2][0]
+        y2 = projected[2][1]
 
-        proyeccion[0][0] *= (0.5*display_width)
-        proyeccion[0][1] *= (0.5*display_height)
-        proyeccion[1][0] *= (0.5*display_width)
-        proyeccion[1][1] *= (0.5*display_height)
-        proyeccion[2][0] *= (0.5*display_width)
-        proyeccion[2][1] *= (0.5*display_height)
+        x0 += 4.0
+        y0 += 4.0
+        x1 += 4.0
+        y1 += 4.0
+        x2 += 4.0
+        y2 += 4.0
 
-        thic = 1
-        # pg.draw.line(win,celeste,(proyeccion[0][0], proyeccion[0][1]),(proyeccion[1][0], proyeccion[1][1]),thic)
-        # pg.draw.line(win,celeste,(proyeccion[1][0], proyeccion[1][1]),(proyeccion[2][0], proyeccion[2][1]),thic)
-        # pg.draw.line(win,celeste,(proyeccion[2][0], proyeccion[2][1]),(proyeccion[1][0], proyeccion[1][1]),thic)
-        pg.draw.polygon(win,tea_green,[(proyeccion[0][0], proyeccion[0][1]),(proyeccion[1][0], proyeccion[1][1]),(proyeccion[2][0], proyeccion[2][1])],thic)
+        x0 *= (0.1*display_width)
+        y0 *= (0.1*display_height)
+        x1 *= (0.1*display_width)
+        y1 *= (0.1*display_height)
+        x2 *= (0.1*display_width)
+        y2 *= (0.1*display_height)
+
+        pg.draw.polygon(win,deep_champagne,[(x0,y0),(x1,y1),(x2,y2)],1)
+
+
 
 
 
@@ -160,16 +184,17 @@ def cube(mesh_Cube:list,thetaX:float,thetaZ:float):
 #=================================CUBE_PARAMETERS===============================
 
 # Esquinas del Cubo
-#               x   y   z
-e1 = np.array([0.0,0.0,0.0])
-e2 = np.array([0.0,1.0,0.0])
-e3 = np.array([1.0,1.0,0.0])
-e4 = np.array([1.0,0.0,0.0])
-e5 = np.array([0.0,0.0,1.0])
-e6 = np.array([0.0,1.0,1.0])
-e7 = np.array([1.0,1.0,1.0])
-e8 = np.array([1.0,0.0,1.0])
+#                x    y   z   w
+e1 = np.array([-1.0,-1.0,1.0,1.0])
+e2 = np.array([-1.0,1.0,1.0,1.0])
+e3 = np.array([1.0,1.0,1.0,1.0])
+e4 = np.array([1.0,-1.0,1.0,1.0])
+e5 = np.array([-1.0,-1.0,-1.0,1.0])
+e6 = np.array([-1.0,1.0,-1.0,1.0])
+e7 = np.array([1.0,1.0,-1.0,1.0])
+e8 = np.array([1.0,-1.0,-1.0,1.0])
 
+MultMatrix4X4Vector1x4(e1,Proj())
 
 # Front face triangles
 t1 = [e1,e2,e3]
@@ -198,8 +223,8 @@ t12 = [e8,e1,e4]
 
 mesh_Cube = [t1,t2,t3,t4,t5,t6,t7,t8,t9,t10,t11,t12]
 # mesh_Cube = [t1,t2,t5,t6]
-#===============================================================================
-
+# #===============================================================================
+#
 def main(mesh):
     thetaX = 1
     thetaZ = 1
@@ -228,7 +253,7 @@ def main(mesh):
         # elif pressed_keys[K_d]:
 
 
-        cube(mesh,thetaX,thetaZ)
+        cube(mesh)
 
 
 
@@ -240,5 +265,5 @@ def main(mesh):
 
 
 main(mesh_Cube)
-
-# ==============================================================================
+#
+# # ==============================================================================
