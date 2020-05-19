@@ -94,13 +94,6 @@ def Rotz (theta:float):
 # Rotation x
 def Rotx (theta:float):
 
-    matRotx[0][0] = 1.0
-    matRotx[1][1] = mt.cos(mt.radians(theta))
-    matRotx[1][2] = mt.sin(mt.radians(theta))
-    matRotx[2][1] = -(mt.sin(mt.radians(theta)))
-    matRotx[2][2] = mt.cos(mt.radians(theta))
-    matRotx[3][3] = 1.0
-
     a0 = 1.0
     b1 = mt.cos(mt.radians(theta))
     b2 = mt.sin(mt.radians(theta))
@@ -133,25 +126,35 @@ def scale_xyz(x=1,y=1,z=1):
                         [0,0,0,1]])  #D
 
 
-def cube(mesh_Cube:list):
+def cuadradoide(mesh_Cube:list,thetaX:float,thetaZ:float):
     for tri in mesh_Cube:
         projected = []
-        translated = tri
+        rotatedZ = []
+        rotatedXZ = []
 
+
+        for vec in tri:
+            # Efecto de proyección
+            temp = MultMatrix4X4Vector1x4(vec,Rotz(thetaZ))
+            rotatedZ.append(temp)
+
+        for vec in rotatedZ:
+            temp = MultMatrix4X4Vector1x4(vec,Rotx(thetaX))
+            rotatedXZ.append(temp)
+
+
+        translated = deepcopy(rotatedXZ)
         # Alejar la camara
-        translated[0][2] = tri[0][2] + 3.0
-        translated[1][2] = tri[1][2] + 3.0
-        translated[2][2] = tri[2][2] + 3.0
+        translated[0][2] = rotatedXZ[0][2] + 3.0
+        translated[1][2] = rotatedXZ[1][2] + 3.0
+        translated[2][2] = rotatedXZ[2][2] + 3.0
 
-        print(translated)
+        # print(translated)
 
         for vec in translated:
-            # print(vec)
-
             # Efecto de proyección
             temp = MultMatrix4X4Vector1x4(vec,Proj())
             projected.append(temp);
-
 
         x0 = projected[0][0]
         y0 = projected[0][1]
@@ -160,6 +163,7 @@ def cube(mesh_Cube:list):
         x2 = projected[2][0]
         y2 = projected[2][1]
 
+        # ===========| ESCALAR TRIANGULOS |=========== #
         x0 += 4.0
         y0 += 4.0
         x1 += 4.0
@@ -173,6 +177,7 @@ def cube(mesh_Cube:list):
         y1 *= (0.1*display_height)
         x2 *= (0.1*display_width)
         y2 *= (0.1*display_height)
+        # ============================================ #
 
         pg.draw.polygon(win,deep_champagne,[(x0,y0),(x1,y1),(x2,y2)],1)
 
@@ -182,7 +187,7 @@ def cube(mesh_Cube:list):
 
 
 #=================================CUBE_PARAMETERS===============================
-
+#
 # Esquinas del Cubo
 #                x    y   z   w
 e1 = np.array([-1.0,-1.0,1.0,1.0])
@@ -194,7 +199,17 @@ e6 = np.array([-1.0,1.0,-1.0,1.0])
 e7 = np.array([1.0,1.0,-1.0,1.0])
 e8 = np.array([1.0,-1.0,-1.0,1.0])
 
-MultMatrix4X4Vector1x4(e1,Proj())
+#
+# e1 = np.array([0.0,0.0,0.0,1.0])
+# e2 = np.array([0.0,1.0,0.0,1.0])
+# e3 = np.array([1.0,1.0,0.0,1.0])
+# e4 = np.array([1.0,0.0,0.0,1.0])
+# e5 = np.array([0.0,0.0,1.0,1.0])
+# e6 = np.array([0.0,1.0,1.0,1.0])
+# e7 = np.array([1.0,1.0,1.0,1.0])
+# e8 = np.array([1.0,0.0,1.0,1.0])
+
+
 
 # Front face triangles
 t1 = [e1,e2,e3]
@@ -229,7 +244,7 @@ def main(mesh):
     thetaX = 1
     thetaZ = 1
     while True:
-        # win.fill(black)
+        win.fill(black)
 
         for event in pg.event.get():
             if event.type == pg.QUIT:
@@ -248,12 +263,17 @@ def main(mesh):
             thetaZ += 1
         elif pressed_keys[K_s]:
             thetaZ -= 1
-        #
-        # if pressed_keys[K_e]:
-        # elif pressed_keys[K_d]:
+
+        if pressed_keys[K_e]:
+            thetaX += 1
+            thetaZ += 1
+
+        elif pressed_keys[K_d]:
+            thetaX -= 1
+            thetaZ -= 1
 
 
-        cube(mesh)
+        cuadradoide(mesh,thetaX,thetaZ)
 
 
 
