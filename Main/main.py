@@ -17,7 +17,7 @@ pg.init()
 display_width =  920
 display_height = 920
 
-win = pg.display.set_mode((display_width,display_height))#,FULLSCREEN)
+win = pg.display.set_mode((display_width,display_height),FULLSCREEN)
 pg.display.set_caption("Proyeccion de Pespectiva",)
 
 transparent = (0,0,0,0)
@@ -226,7 +226,7 @@ def cuadradoide(mesh_Cube:list,thetaX:float,thetaZ:float,thetaY:float,Color:int)
 
 
         if ((normal[0]*cl0)+(normal[1]*cl1)+(normal[2]*cl2)) > 0:
-            # Proyection 3D-->2D 
+            # Proyection 3D-->2D
             for vec in translated:
                 # Efecto de proyección
                 temp = MultMatrix4X4Vector1x4(vec,Proj())
@@ -260,7 +260,13 @@ def cuadradoide(mesh_Cube:list,thetaX:float,thetaZ:float,thetaY:float,Color:int)
             pg.draw.polygon(win,COL[Color],[(x0,y0),(x1,y1),(x2,y2)],thic)
             pg.draw.polygon(win,white,[(x0,y0),(x1,y1),(x2,y2)],thic2)
 
-
+def ProyeccionText(x:float,y:float,Color:int):
+    font1 = pg.font.SysFont("DM Mono",55,False,False,None) #Para mejor experiencia instala hay que intalar la tipografía que está en la carpeta.
+    COL = [lemon_yellow,tea_green,deep_champagne,light_pink,celeste,mauve]
+    text = font1.render("Proyección de Perspectiva",True, COL[Color]) # Render del texto en la pantalla
+    text2 = font1.render("Proyección de Perspectiva",True, (255,255,255)) # Render del texto en la pantalla
+    win.blit(text2,(x/17,(4*y/5)))
+    win.blit(text,(x/17,(4*y/5)+5))
 
 
 #=================================CUBE_PARAMETERS===============================
@@ -326,10 +332,17 @@ mesh_Piram = [t11,t12,t13,t14,t15,t16]
 # #===============================================================================
 #
 def main(mesh):
-    thetaX = 1
-    thetaZ = 1
-    thetaY = 1
+    thetaX = 0.0
+    thetaZ = 0.0
+    thetaY = 0.0
+
     Color = 0
+
+    # b_ms = pg.mixer
+    # b_ms.music.load("Flume.mp3")
+    # b_ms.music.play(-1)
+
+
     while True:
         win.fill(black)
 
@@ -381,6 +394,17 @@ def main(mesh):
             else:
                 Color = 0
 
+        ProyeccionText(display_width,display_height+100,Color)
+        ProyeccionText(display_width,display_height-0,Color)
+        ProyeccionText(display_width,display_height-100,Color)
+        ProyeccionText(display_width,display_height-200,Color)
+        ProyeccionText(display_width,display_height-300,Color)
+        ProyeccionText(display_width,display_height-400,Color)
+        ProyeccionText(display_width,display_height-500,Color)
+        ProyeccionText(display_width,display_height-600,Color)
+        ProyeccionText(display_width,display_height-700,Color)
+        ProyeccionText(display_width,display_height-800,Color)
+        ProyeccionText(display_width,display_height-900,Color)
 
         cuadradoide(mesh,thetaX,thetaZ,thetaY,Color)
 
@@ -394,5 +418,5 @@ def main(mesh):
 #
 # # ==============================================================================
 
-# main(mesh_Cube)
-main(mesh_Piram)
+main(mesh_Cube)
+# main(mesh_Piram)
