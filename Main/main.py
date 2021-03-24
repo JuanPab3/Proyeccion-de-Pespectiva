@@ -17,7 +17,7 @@ pg.init()
 display_width =  920
 display_height = 920
 
-win = pg.display.set_mode((display_width,display_height),FULLSCREEN)
+win = pg.display.set_mode((display_width,display_height))#,FULLSCREEN)
 pg.display.set_caption("Proyeccion de Pespectiva",)
 
 transparent = (0,0,0,0)
@@ -338,9 +338,6 @@ def main(mesh):
 
     Color = 0
 
-    # b_ms = pg.mixer
-    # b_ms.music.load("Flume.mp3")
-    # b_ms.music.play(-1)
 
 
     while True:
@@ -394,17 +391,17 @@ def main(mesh):
             else:
                 Color = 0
 
-        ProyeccionText(display_width,display_height+100,Color)
-        ProyeccionText(display_width,display_height-0,Color)
-        ProyeccionText(display_width,display_height-100,Color)
-        ProyeccionText(display_width,display_height-200,Color)
-        ProyeccionText(display_width,display_height-300,Color)
-        ProyeccionText(display_width,display_height-400,Color)
-        ProyeccionText(display_width,display_height-500,Color)
-        ProyeccionText(display_width,display_height-600,Color)
-        ProyeccionText(display_width,display_height-700,Color)
-        ProyeccionText(display_width,display_height-800,Color)
-        ProyeccionText(display_width,display_height-900,Color)
+#         ProyeccionText(display_width,display_height+100,Color)
+#         ProyeccionText(display_width,display_height-0,Color)
+#         ProyeccionText(display_width,display_height-100,Color)
+#         ProyeccionText(display_width,display_height-200,Color)
+#         ProyeccionText(display_width,display_height-300,Color)
+#         ProyeccionText(display_width,display_height-400,Color)
+#         ProyeccionText(display_width,display_height-500,Color)
+#         ProyeccionText(display_width,display_height-600,Color)
+#         ProyeccionText(display_width,display_height-700,Color)
+#         ProyeccionText(display_width,display_height-800,Color)
+#         ProyeccionText(display_width,display_height-900,Color)
 
         cuadradoide(mesh,thetaX,thetaZ,thetaY,Color)
 
